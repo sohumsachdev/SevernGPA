@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Severn School Semester GPA Calculator</title>
+  <style>
+    body {
+      background-color: #1e1e1e;
+      color: #fff;
+      font-family: Sans-serif, Verdana;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 800px;
+      margin: 20px auto;
+      padding: 20px;
+      background-color: #282828;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    h1, h2 {
+      color: #a61125; /* Severn maroon */
+    }
+    .logo {
+      display: block;
+      margin: 0 auto 20px;
+      width: 150px;
+    }
+    .course {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    label, select, button {
+      font-size: 16px;
+    }
+    select {
+      margin-left: 10px;
+    }
+    button {
+      background-color: #a61125;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #800020;
+    }
+    .delete-btn {
+      background-color: #dc3545;
+      color: white;
+      padding: 5px 10px;
+      margin-left: 10px;
+    }
+    .delete-btn:hover {
+      background-color: #c82333;
+    }
+    footer {
+      text-align: center;
+      margin-top: 20px;
+      color: #bbb;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <img src="severn-logo.png" alt="Severn School Logo" class="logo">
+      <h1>Severn GPA Calculator (Semester) </h1>
+    </header>
+    <form id="gpa-form">
+      <div id="courses">
+        <!-- Courses will be added dynamically -->
+      </div>
+      <button type="button" id="add-course">Add Course</button>
+      <button type="submit">Calculate GPA</button>
+    </form>
+    <h2 id="gpa-result"></h2>
+    <p id="honors-result"></p>
+    <footer>
+      <p>Keep the grade for free periods empty</p>
+      <p>Based on the 2024-2025 Severn School Handbook</p>
+      <p>Created by Sohum Sachdev '28</p>
+    </footer>
+  </div>
+
+  <script>
+    const coursesDiv = document.getElementById('courses');
+    const gpaForm = document.getElementById('gpa-form');
+    const gpaResult = document.getElementById('gpa-result');
+    const honorsResult = document.getElementById('honors-result');
+    const gradePoints = {
+      "A+": 4.33, "A": 4.00, "A-": 3.67,
+      "B+": 3.33, "B": 3.00, "B-": 2.67,
+      "C+": 2.33, "C": 2.00, "C-": 1.67,
+      "D+": 1.33, "D": 1.00, "D-": 0.67,
+      "F": 0.00
+    };
+
+    // Add 7 default courses
+    for (let i = 1; i <= 7; i++) {
+      addCourse(`Period ${i}`);
+    }
+
+    document.getElementById('add-course').addEventListener('click', () => {
+      addCourse(`Course ${coursesDiv.children.length + 1}`);
+    });
+
+    function addCourse(courseName) {
+      const courseDiv = document.createElement('div');
+      courseDiv.className = 'course';
+      courseDiv.innerHTML = `
+        <label>${courseName} Grade:
+          <select class="grade">
+            <option value="">Empty</option>
+            ${Object.keys(gradePoints).map(grade => `<option value="${gradePoints[grade]}">${grade}</option>`).join('')}
+          </select>
+        </label>
+        <label>Type:
+          <select class="type">
+            <option value="0">Regular</option>
+            <option value="0.33">Honors</option>
+            <option value="0.67">AP</option>
+          </select>
+        </label>
+        <button type="button" class="delete-btn">Delete</button>
+      `;
+      coursesDiv.appendChild(courseDiv);
+
+      // Attach delete button functionality
+      courseDiv.querySelector('.delete-btn').addEventListener('click', () => {
+        coursesDiv.removeChild(courseDiv);
+      });
+    }
+
+    gpaForm.addEventListener('submit', event => {
+      event.preventDefault();
+
+      const grades = document.querySelectorAll('.grade');
+      const types = document.querySelectorAll('.type');
+      let totalPoints = 0;
+      let totalCourses = 0;
+
+      grades.forEach((grade, index) => {
+        const gradeValue = parseFloat(grade.value);
+        const typeValue = parseFloat(types[index].value);
+        // Ignore blank grades or invalid grades
+        if (!isNaN(gradeValue) && grade.value !== "") {
+          totalPoints += gradeValue + typeValue;
+          totalCourses++;
+        }
+      });
+
+      const gpa = totalCourses > 0 ? (totalPoints / totalCourses).toFixed(2) : 0;
+      gpaResult.textContent = `Your GPA: ${gpa}`;
+
+      if (gpa >= 3.67) {
+        honorsResult.textContent = "Congratulations! You qualify for the Head of School's List and the Honor Roll.";
+      } else if (gpa >= 3.00) {
+        honorsResult.textContent = "Congratulations! You qualify for the Honor Roll.";
+      } else {
+        honorsResult.textContent = "";
+      }
+    });
+  </script>
+</body>
+</html>
